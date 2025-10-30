@@ -1,3 +1,5 @@
+from datetime import datetime, timedelta, timezone
+
 import numpy as np
 import cv2
 
@@ -46,12 +48,14 @@ async def regist_image(
 
     #4) 벡터 데이터 베이스에 업로드
     pc, index = get_database()
+    korea = timezone(timedelta(hours=9))
+    now = datetime.now(korea).strftime("%Y-%m-%d %H:%M:%S")
     index.upsert(
         vectors=[
             {
             "id": text, 
             "values": embedding, 
-            "metadata": {"genre": "comedy", "year": 2020}
+            "metadata": {"registed date": now}
             },
     ])
 
@@ -92,6 +96,10 @@ async def classify_image(file: UploadFile = File(...)):
     print(f"Metadata: {match['metadata']}")
     print("------")
     answer = {}
-    answer['id'] = match['id']
-    answer['score'] = match['score']
+    if match['score'] > 0.2:
+        answer['id'] = match['id']
+        answer['score'] = match['score']
+    else:
+        answer['id'] = match['id']
+        answer['score'] = match['score']
     return answer
