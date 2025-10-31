@@ -8,6 +8,7 @@ from fastapi import FastAPI
 
 #프로젝트 내부
 from service import service_router
+from database import conn
 
 app = FastAPI(
     title="Face-Rec Service",

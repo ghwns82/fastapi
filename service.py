@@ -30,6 +30,7 @@ def extract_face_embedding(img):
 @service_router.post('/regist')
 async def regist_image(
     text: str = Form(...),             # 텍스트
+    text2: str = Form(...),             # 텍스트
     file: UploadFile = File(...),      # 이미지 파일
 ):
     # 1) 바이트 읽기
@@ -55,12 +56,12 @@ async def regist_image(
             {
             "id": text, 
             "values": embedding, 
-            "metadata": {"registed date": now}
+            "metadata": {"registed date": now,'number':text2}
             },
     ])
 
     return {
-        "message": f"Received text: {text}, image: {file.filename}",
+        "message": f"Received text: {text}, number: {text2}, image: {file.filename}",
         "shape": upload_img.shape,
     }
 
@@ -100,6 +101,6 @@ async def classify_image(file: UploadFile = File(...)):
         answer['id'] = match['id']
         answer['score'] = match['score']
     else:
-        answer['id'] = match['id']
+        answer['id'] = 'unknown'
         answer['score'] = match['score']
     return answer
