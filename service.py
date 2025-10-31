@@ -8,6 +8,9 @@ from utils import get_models, get_database
 
 from insightface.utils import face_align
 
+from attendance import insert_data
+
+
 service_router = APIRouter()
 
 
@@ -100,6 +103,8 @@ async def classify_image(file: UploadFile = File(...)):
     if match['score'] > 0.2:
         answer['id'] = match['id']
         answer['score'] = match['score']
+
+        insert_data(match['id'],match['id'])
     else:
         answer['id'] = 'unknown'
         answer['score'] = match['score']

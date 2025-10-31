@@ -8,7 +8,7 @@ from fastapi import FastAPI
 
 #프로젝트 내부
 from service import service_router
-from database import conn
+from attendance import attendance_router
 
 app = FastAPI(
     title="Face-Rec Service",
@@ -21,6 +21,7 @@ async def welcome() -> dict:
 
 
 app.include_router(router=service_router)
+app.include_router(router=attendance_router)
 
 
 
