@@ -14,9 +14,9 @@ conn = sqlite3.connect(DB_PATH, check_same_thread=False)
 
 cmd1 ='''CREATE TABLE IF NOT EXISTS attendance (
     id INTEGER PRIMARY KEY AUTOINCREMENT,
-    student_id TEXT NOT NULL,
-    student_name TEXT NOT NULL,
-    timestamp DATETIME DEFAULT CURRENT_TIMESTAMP
+    ID TEXT NOT NULL,
+    name TEXT NOT NULL,
+    timestamp DATETIME DEFAULT (DATETIME(CURRENT_TIMESTAMP, '+9 hours'))
     );
 '''
 def init_db():
@@ -29,11 +29,11 @@ init_db()
 
 @attendance_router.post("/attendance")
 def query_attendance(    
-    student_id: str = Form(...),
-    student_name: str = Form(...)
+    ID: str = Form(...),
+    name: str = Form(...)
 ):
     """
-    요청: { "student_id": "...", "student_name": "..." }
+    요청: { "ID": "...", "name": "..." }
     응답: { "count": n, "rows": [ {col: val, ...}, ... ] }
     """
     try:
@@ -43,13 +43,13 @@ def query_attendance(
                 """
                 SELECT *
                 FROM attendance
-                WHERE student_id = ?
-                  AND student_name = ?
+                WHERE ID = ?
+                  AND name = ?
                 -- 필요하면 아래처럼 대소문자 무시:
-                -- WHERE student_id = ?
-                --   AND UPPER(student_name) = UPPER(?)
+                -- WHERE ID = ?
+                --   AND UPPER(name) = UPPER(?)
                 """,
-                (student_id, student_name),
+                (ID, name),
             )
             rows: List[Dict[str, Any]] = [dict(r) for r in cur.fetchall()]
 
@@ -59,15 +59,15 @@ def query_attendance(
         raise HTTPException(500, f"DB error: {e}")
 
 
-def insert_data(student_id, student_name):
+def insert_data(ID, name):
     try:
         with sqlite3.connect(DB_PATH) as conn:
             cur = conn.execute(
                 """
-                INSERT INTO attendance (student_id, student_name)
+                INSERT INTO attendance (ID, name)
                 VALUES (?, ?)
                 """,
-                (student_id, student_name),
+                (ID, name),
             )
             
 
@@ -83,6 +83,6 @@ def insert_data(student_id, student_name):
             #     "time": datetime.now().isoformat(),
             # }
 
-            return {"status": "success", "student_id": student_id}
+            return {"status": "success", "ID": ID}
     except sqlite3.Error as e:
         raise HTTPException(500, f"DB error: {e}")
