@@ -32,8 +32,8 @@ def extract_face_embedding(img):
 
 @service_router.post('/regist')
 async def regist_image(
-    text: str = Form(...),             # 텍스트
-    text2: str = Form(...),             # 텍스트
+    name: str = Form(...),             # 텍스트
+    ID: str = Form(...),             # 텍스트
     file: UploadFile = File(...),      # 이미지 파일
 ):
     # 1) 바이트 읽기
@@ -57,14 +57,15 @@ async def regist_image(
     index.upsert(
         vectors=[
             {
-            "id": text, 
+            "id": ID,
+            'name':name,
             "values": embedding, 
-            "metadata": {"registed date": now,'number':text2}
+            "metadata": {"registed date": now}
             },
     ])
 
     return {
-        "message": f"Received text: {text}, number: {text2}, image: {file.filename}",
+        "message": f"Received name: {name}, ID: {ID}, image: {file.filename}",
         "shape": upload_img.shape,
     }
 
