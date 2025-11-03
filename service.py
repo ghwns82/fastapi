@@ -32,8 +32,8 @@ def extract_face_embedding(img):
 
 @service_router.post('/regist')
 async def regist_image(
-    name: str = Form(...),             # 텍스트
-    ID: str = Form(...),             # 텍스트
+    student_name: str = Form(...),             # 텍스트
+    student_id: str = Form(...),             # 텍스트
     file: UploadFile = File(...),      # 이미지 파일
 ):
     # 1) 바이트 읽기
@@ -57,15 +57,14 @@ async def regist_image(
     index.upsert(
         vectors=[
             {
-            "id": ID,
-            'name':name,
+            'id':student_id,
             "values": embedding, 
-            "metadata": {"registed date": now}
+            "metadata": {"registed date": now, 'student_name':student_name,'student_id':student_id,}
             },
     ])
 
     return {
-        "message": f"Received name: {name}, ID: {ID}, image: {file.filename}",
+        "message": f"Received student_name: {student_name}, student_id: {student_id}, image: {file.filename}",
         "shape": upload_img.shape,
     }
 
@@ -96,17 +95,18 @@ async def classify_image(file: UploadFile = File(...)):
     )
 
     match = result["matches"][0]
-    print(f"ID: {match['id']}")
+    print(f"id: {match['id']}")
     print(f"Score: {match['score']}")
     print(f"Metadata: {match['metadata']}")
     print("------")
     answer = {}
     if match['score'] > 0.2:
-        answer['id'] = match['id']
+        answer['student_id'] = match['metadata']['student_id']
+        answer['student_name'] = match['metadata']['student_name']
         answer['score'] = match['score']
 
-        insert_data(match['id'],match['id'])
+        insert_data(answer['student_id'], answer['student_name'])
     else:
-        answer['id'] = 'unknown'
+        answer['student_id'] = 'unknown'
         answer['score'] = match['score']
     return answer
