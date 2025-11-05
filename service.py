@@ -3,7 +3,7 @@ from datetime import datetime, timedelta, timezone
 import numpy as np
 import cv2
 
-from fastapi import APIRouter, File, Form, UploadFile
+from fastapi import APIRouter, File, Form, UploadFile, HTTPException
 from utils import get_models, get_database
 
 from insightface.utils import face_align
@@ -84,7 +84,8 @@ async def classify_image(file: UploadFile = File(...)):
     
     #3) 얼굴 임베딩 검출
     embedding = extract_face_embedding(upload_img)
-
+    if embedding is None or embedding.size == 0:
+        raise HTTPException(status_code=204, detail="No Person")
     #4) 벡터 데이터 베이스에 쿼리
     pc, index = get_database()
 
@@ -101,12 +102,11 @@ async def classify_image(file: UploadFile = File(...)):
     print("------")
     answer = {}
     if match['score'] > 0.2:
-        answer['student_id'] = match['metadata']['student_id']
         answer['student_name'] = match['metadata']['student_name']
         answer['score'] = match['score']
 
-        insert_data(answer['student_id'], answer['student_name'])
+        insert_data(match['metadata']['student_id'], answer['student_name'])
     else:
-        answer['student_id'] = 'unknown'
+        answer['student_name'] = 'unknown'
         answer['score'] = match['score']
     return answer

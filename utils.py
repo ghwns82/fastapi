@@ -7,7 +7,6 @@ from insightface.app import FaceAnalysis
 from pinecone import Pinecone
 
 # 로딩
-
 @lru_cache(maxsize=1)
 def get_models(ctx_id: int = -1):
     # print('모델 설치 중')
@@ -26,9 +25,10 @@ def get_database():
     print('데이터베이스 로딩 중')
     load_dotenv()
     API_KEY = os.getenv("API_KEY")
+    HOST = os.getenv("HOST")
 
     pc = Pinecone(api_key=API_KEY)
-    index = pc.Index(host="https://facerecsystem-vatdgkb.svc.aped-4627-b74a.pinecone.io")
+    index = pc.Index(host=HOST)
 
     print('데이터베이스 로딩 완료')
     return pc, index
